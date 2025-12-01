@@ -5,73 +5,37 @@ const router = express.Router();
 
 // POST — Register a new book (Backend Developer #1)
 router.post("/register", async (req, res) => {
-  // 1. Extract all required fields from the form (sent by frontend)
-  const {
-    isbn,
-    title,
-    pubdate,
-    pubid,
-    cost,
-    retail,
-    discount,
-    category
-  } = req.body;
+  const { isbn, title, pubdate, pubid, cost, retail, discount, category } = req.body;
 
-   let connection;
-   try {
-    // 2. Connect to Oracle Database using environment variables
+  let connection;
+  try {
     connection = await oracledb.getConnection({
       user: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
       connectionString: process.env.DB_CONNECT_STRING,
     });
 
-    // 3. Call the stored procedure created in SQL Developer
-    //    This will insert a new row into JL_BOOKS
+    // Parse date: handle "2024 01 01", "2024/01/01", or "2024-01-01"
+    const dateStr = pubdate.trim().replace(/[\s\/]+/g, '-');
+
     await connection.execute(
-      `
-      BEGIN
-        sp_Book_register(
-          :isbn,
-          :title,
-          :pubdate,
-          :pubid,
-          :cost,
-          :retail,
-          :discount,
-          :category
-        );
-      END;
-      `,
-      {
-        isbn,
-        title,
-        pubdate,
-        pubid,
-        cost,
-        retail,
-        discount,
-        category,
-      }
+      `BEGIN
+         sp_Book_register(:isbn, :title, TO_DATE(:pubdate, 'YYYY-MM-DD'), :pubid, :cost, :retail, :discount, :category);
+       END;`,
+      { isbn, title, pubdate: dateStr, pubid, cost, retail, discount, category },
+      { autoCommit: true }
     );
 
-    // 4. Send simple success message back to the frontend
     res.json({ success: true, message: "Book registered successfully" });
-
   } catch (err) {
-    // 5. Handle any database or procedure errors
-    res.status(500).json({
-      message: "Error registering book",
-      error: err
-    });
-
+    console.error('Registration error:', err);
+    res.status(500).json({ message: "Error registering book", error: err.message });
   } finally {
-    // 6. Always close the database connection
     if (connection) await connection.close();
   }
 });
 
-// GET — List all books
+// GET — List all books (Backend Developer #2)
 router.get("/all", async (req, res) => {
   let connection;
   try {
@@ -95,7 +59,7 @@ router.get("/all", async (req, res) => {
   }
 });
 
-// POST — Update cost / retail / category
+// POST — Update cost / retail / category of a book (Backend Developer #2)
 router.post("/update", async (req, res) => {
   const { isbn, newCost, newRetail, newCategory } = req.body;
 
