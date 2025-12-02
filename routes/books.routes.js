@@ -15,7 +15,12 @@ router.post("/register", async (req, res) => {
       connectionString: process.env.DB_CONNECT_STRING,
     });
 
+<<<<<<< HEAD
     const dateStr = pubdate.trim().replace(/[\s\/]+/g, "-");
+=======
+    // Parse date: handle "2024 01 01", "2024/01/01", or "2024-01-01"
+    const dateStr = pubdate.trim().replace(/[\s\/]+/g, '-');
+>>>>>>> 73208b55bd04f31a80bbfd3ce5ea817b3aa97af1
 
     await connection.execute(
       `BEGIN
@@ -27,7 +32,11 @@ router.post("/register", async (req, res) => {
 
     res.json({ success: true, message: "Book registered successfully" });
   } catch (err) {
+<<<<<<< HEAD
     console.error("Registration error:", err);
+=======
+    console.error('Registration error:', err);
+>>>>>>> 73208b55bd04f31a80bbfd3ce5ea817b3aa97af1
     res.status(500).json({ message: "Error registering book", error: err.message });
   } finally {
     if (connection) await connection.close();
@@ -52,12 +61,17 @@ router.get("/all", async (req, res) => {
 
     res.json(result.rows);
   } catch (err) {
+<<<<<<< HEAD
     res.status(500).json({ message: "Error fetching books", error: err.message });
+=======
+    res.status(500).json({ message: "Error fetching books", error: err });
+>>>>>>> 73208b55bd04f31a80bbfd3ce5ea817b3aa97af1
   } finally {
     if (connection) await connection.close();
   }
 });
 
+<<<<<<< HEAD
 // POST — Update cost / retail / category (Backend Developer #2)
 
 router.post("/update", async (req, res) => {
@@ -68,6 +82,13 @@ router.post("/update", async (req, res) => {
   const new_category = req.body.new_category ?? req.body.newCategory;
 
   if (!isbn) return res.status(400).json({ message: "ISBN is required" });
+=======
+// POST — Update cost / retail / category of a book (Backend Developer #2)
+router.post("/update", async (req, res) => {
+  const { isbn, newCost, newRetail, newCategory } = req.body;
+
+  if (!isbn) return res.status(400).json({ message: "ISBN required" });
+>>>>>>> 73208b55bd04f31a80bbfd3ce5ea817b3aa97af1
 
   let connection;
   try {
@@ -78,6 +99,7 @@ router.post("/update", async (req, res) => {
     });
 
     await connection.execute(
+<<<<<<< HEAD
       `BEGIN
          sp_update_book_crc(:isbn, :new_cost, :new_retail, :new_category);
        END;`,
@@ -88,15 +110,33 @@ router.post("/update", async (req, res) => {
         new_category,
       },
       { autoCommit: true }
+=======
+      `BEGIN 
+         sp_update_book_crc(:isbn, :cost, :retail, :category);
+       END;`,
+      {
+        isbn,
+        cost: newCost,
+        retail: newRetail,
+        category: newCategory,
+      }
+>>>>>>> 73208b55bd04f31a80bbfd3ce5ea817b3aa97af1
     );
 
     res.json({ success: true, message: "Book updated successfully" });
   } catch (err) {
+<<<<<<< HEAD
     res.status(500).json({ message: "Error updating book", error: err.message });
+=======
+    res.status(500).json({ message: "Error updating book", error: err });
+>>>>>>> 73208b55bd04f31a80bbfd3ce5ea817b3aa97af1
   } finally {
     if (connection) await connection.close();
   }
 });
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 73208b55bd04f31a80bbfd3ce5ea817b3aa97af1
 export default router;
