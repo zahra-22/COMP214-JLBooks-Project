@@ -1,37 +1,64 @@
-import React, { useState } from "react";
-import { ArrowLeft } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 import { Card } from "../../ui/card";
 import { Button } from "../../ui/button";
 import { Label } from "../../ui/label";
 import { Select } from "../../ui/select";
 
-const books = [
-  { isbn: "9780140283297", title: "The Great Gatsby" },
-  { isbn: "9780061120084", title: "To Kill a Mockingbird" },
-  { isbn: "9780452284234", title: "1984" },
-];
-
-const authors = [
-  { id: "AUTH001", name: "F. Scott Fitzgerald" },
-  { id: "AUTH002", name: "Harper Lee" },
-  { id: "AUTH003", name: "George Orwell" },
-];
-
 export default function AssignAuthor({ onNavigate, notify }) {
+  const [books, setBooks] = useState([]);
+  const [authors, setAuthors] = useState([]);
   const [selectedIsbn, setSelectedIsbn] = useState("");
   const [selectedAuthorId, setSelectedAuthorId] = useState("");
+  const [loading, setLoading] = useState(true);
 
-  const handleSubmit = (e) => {
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const [booksRes, authorsRes] = await Promise.all([
+          axios.get("http://localhost:5000/api/books/all"),
+          axios.get("http://localhost:5000/api/authors/all"),
+        ]);
+
+        setBooks(booksRes.data || []);
+        setAuthors(authorsRes.data || []);
+      } catch (err) {
+        console.error("Error loading books/authors:", err);
+        notify("Failed to load books or authors.", "error");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchData();
+  }, [notify]);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (!selectedIsbn || !selectedAuthorId) {
       notify("Please select both a book and an author.", "error");
       return;
     }
-    console.log("Assigned:", { selectedIsbn, selectedAuthorId });
-    notify("Author assigned to book successfully!", "success");
-    setSelectedIsbn("");
-    setSelectedAuthorId("");
+
+    try {
+      await axios.post("http://localhost:5000/api/authors/assign", {
+        isbn: selectedIsbn,
+        authorId: selectedAuthorId,
+      });
+
+      notify("Author assigned to book successfully!", "success");
+      setSelectedIsbn("");
+      setSelectedAuthorId("");
+    } catch (err) {
+      console.error("Error assigning author:", err);
+      notify("Failed to assign author to book.", "error");
+    }
   };
+
+  if (loading) {
+    return <p>Loading books and authors...</p>;
+  }
 
   return (
     <div>
@@ -78,8 +105,8 @@ export default function AssignAuthor({ onNavigate, notify }) {
             >
               <option value="">-- Select Author --</option>
               {authors.map((a) => (
-                <option key={a.id} value={a.id}>
-                  {a.id} - {a.name}
+                <option key={a.authorId} value={a.authorId}>
+                  {a.authorId} - {a.firstName} {a.lastName}
                 </option>
               ))}
             </Select>

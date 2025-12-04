@@ -22,7 +22,8 @@ export default function BookList({ onNavigate, notify }) {
   }, []);
 
   const handleChange = (index, field, value) => {
-    const parsed = field === "category" ? value : parseFloat(value);
+    const parsed =
+      field === "category" ? value : parseFloat(value);
 
     setBooks((prev) =>
       prev.map((b, i) =>
@@ -42,15 +43,15 @@ export default function BookList({ onNavigate, notify }) {
   const handleUpdate = async () => {
     try {
       for (const book of books) {
-        await axios.post("http://localhost:5000/api/books/update", {
-          isbn: book.isbn,
-          cost: book.cost,
-          retail: book.retail,
-          category: book.category,
+        await axios.put("http://localhost:5000/api/books/update", {
+          isbn: book.ISBN || book.isbn,
+          cost: book.COST || book.cost,
+          retail: book.RETAIL || book.retail,
+          category: book.CATEGORY || book.category,
         });
       }
 
-      notify("Books updated successfully!", "success");
+      notify("Books updated successfully", "success");
     } catch (error) {
       console.error("Update failed:", error);
       notify("Failed to update books", "error");
@@ -73,7 +74,7 @@ export default function BookList({ onNavigate, notify }) {
       <header className="page-header">
         <h1 className="page-title">Book List / Update Form</h1>
         <p className="page-subtitle">
-          Only Cost, Retail Price and Category fields can be updated.
+          Only Cost, Retail Price and Category can be updated.
         </p>
       </header>
 
@@ -94,17 +95,17 @@ export default function BookList({ onNavigate, notify }) {
 
             <tbody>
               {books.map((b, i) => (
-                <tr key={b.isbn}>
-                  <td>{b.isbn}</td>
-                  <td>{b.title}</td>
-                  <td>{b.pubdate}</td>
-                  <td>{b.pubid}</td>
+                <tr key={b.ISBN || b.isbn}>
+                  <td>{b.ISBN || b.isbn}</td>
+                  <td>{b.TITLE || b.title}</td>
+                  <td>{b.PUBDATE || b.pubdate}</td>
+                  <td>{b.PUBID || b.pubid}</td>
 
                   <td>
                     <Input
                       type="number"
                       step="0.01"
-                      value={b.cost}
+                      value={b.COST || b.cost}
                       onChange={(e) =>
                         handleChange(i, "cost", e.target.value)
                       }
@@ -115,7 +116,7 @@ export default function BookList({ onNavigate, notify }) {
                     <Input
                       type="number"
                       step="0.01"
-                      value={b.retail}
+                      value={b.RETAIL || b.retail}
                       onChange={(e) =>
                         handleChange(i, "retail", e.target.value)
                       }
@@ -124,7 +125,7 @@ export default function BookList({ onNavigate, notify }) {
 
                   <td>
                     <Input
-                      value={b.category}
+                      value={b.CATEGORY || b.category}
                       onChange={(e) =>
                         handleChange(i, "category", e.target.value)
                       }

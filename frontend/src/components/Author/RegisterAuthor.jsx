@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ArrowLeft } from "lucide-react";
+import axios from "axios";
 import { Card } from "../../ui/card";
 import { Button } from "../../ui/button";
 import { Label } from "../../ui/label";
@@ -22,16 +22,29 @@ export default function RegisterAuthor({ onNavigate, notify }) {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Author registered:", formData);
-    notify("Author registered successfully!", "success");
-    setFormData({
-      authorId: "",
-      firstName: "",
-      lastName: "",
-      bio: "",
-    });
+
+    try {
+      await axios.post("http://localhost:5000/api/authors/register", {
+        authorId: formData.authorId,
+        lastName: formData.lastName,
+        firstName: formData.firstName,
+        // bio is just UI-only here, JL_AUTHOR likely has only 3 columns
+      });
+
+      notify("Author registered successfully!", "success");
+
+      setFormData({
+        authorId: "",
+        firstName: "",
+        lastName: "",
+        bio: "",
+      });
+    } catch (err) {
+      console.error("Error registering author:", err);
+      notify("Failed to register author", "error");
+    }
   };
 
   return (
@@ -95,6 +108,7 @@ export default function RegisterAuthor({ onNavigate, notify }) {
               name="bio"
               value={formData.bio}
               onChange={handleChange}
+              placeholder="Optional note about the author"
             />
           </div>
 
