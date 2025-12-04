@@ -356,3 +356,24 @@ form label {
     padding-inline: 1rem;
   }
 }
+
+
+.form-select {
+  width: 100%;
+  padding: 0.55rem 0.65rem;
+  border-radius: 0.6rem;
+  border: 1px solid #ced3dc;
+  font-size: 0.92rem;
+  background-color: #ffffff;
+  transition: 0.15s ease;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  cursor: pointer;
+}
+
+.form-select:focus {
+  border-color: #1c3ba7;
+  background: #f8faff;
+  box-shadow: 0 0 0 2px rgba(28, 59, 167, 0.18);
+}
