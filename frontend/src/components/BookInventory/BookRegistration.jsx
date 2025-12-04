@@ -6,6 +6,22 @@ import { Label } from "../../ui/label";
 import { Input } from "../../ui/input";
 import { Textarea } from "../../ui/textarea";
 
+// Predefined book genres
+const genres = [
+  "Classic",
+  "Fiction",
+  "Non-Fiction",
+  "Mystery",
+  "Fantasy",
+  "Historical",
+  "Sci-Fi",
+  "Romance",
+  "Biography",
+  "Self-Help",
+  "Poetry",
+  "Children",
+];
+
 export default function BookRegistration({ onNavigate, notify }) {
   const [formData, setFormData] = useState({
     isbn: "",
@@ -132,14 +148,26 @@ export default function BookRegistration({ onNavigate, notify }) {
             </div>
           </div>
 
+          {/* Updated Category Field */}
           <div>
             <Label htmlFor="category">Category</Label>
-            <Input
+            <select
               id="category"
               name="category"
               value={formData.category}
               onChange={handleChange}
-            />
+              className="form-select"
+              required
+            >
+              <option value="" disabled>
+                Select a genre
+              </option>
+              {genres.map((g) => (
+                <option key={g} value={g}>
+                  {g}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div>
