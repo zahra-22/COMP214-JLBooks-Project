@@ -1,36 +1,28 @@
-import React, { useState } from "react";
-import { ArrowLeft } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import { Card } from "../../ui/card";
 import { Button } from "../../ui/button";
 import { Input } from "../../ui/input";
 
-const initialBooks = [
-  {
-    isbn: "9780140283297",
-    title: "The Great Gatsby",
-    pubDate: "1925-04-10",
-    pubId: "PUB001",
-    cost: 8.99,
-    retail: 15.99,
-    category: "Classic",
-  },
-  {
-    isbn: "9780061120084",
-    title: "To Kill a Mockingbird",
-    pubDate: "1960-07-11",
-    pubId: "PUB002",
-    cost: 9.5,
-    retail: 16.99,
-    category: "Fiction",
-  },
-];
-
 export default function BookList({ onNavigate, notify }) {
-  const [books, setBooks] = useState(initialBooks);
+  const [books, setBooks] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    axios
+      .get("http://localhost:5000/api/books/all")
+      .then((res) => {
+        setBooks(res.data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Error loading books:", err);
+        notify("Failed to load books", "error");
+      });
+  }, []);
 
   const handleChange = (index, field, value) => {
-    const parsed =
-      field === "category" ? value : parseFloat(value);
+    const parsed = field === "category" ? value : parseFloat(value);
 
     setBooks((prev) =>
       prev.map((b, i) =>
@@ -47,10 +39,25 @@ export default function BookList({ onNavigate, notify }) {
     );
   };
 
-  const handleUpdate = () => {
-    console.log("Updated books:", books);
-    notify("Book list updated successfully.", "success");
+  const handleUpdate = async () => {
+    try {
+      for (const book of books) {
+        await axios.post("http://localhost:5000/api/books/update", {
+          isbn: book.isbn,
+          cost: book.cost,
+          retail: book.retail,
+          category: book.category,
+        });
+      }
+
+      notify("Books updated successfully!", "success");
+    } catch (error) {
+      console.error("Update failed:", error);
+      notify("Failed to update books", "error");
+    }
   };
+
+  if (loading) return <p>Loading books...</p>;
 
   return (
     <div>
@@ -66,8 +73,7 @@ export default function BookList({ onNavigate, notify }) {
       <header className="page-header">
         <h1 className="page-title">Book List / Update Form</h1>
         <p className="page-subtitle">
-          Only Cost, Retail Price and Category fields can be updated. All other
-          fields are read-only.
+          Only Cost, Retail Price and Category fields can be updated.
         </p>
       </header>
 
@@ -85,13 +91,15 @@ export default function BookList({ onNavigate, notify }) {
                 <th>Category</th>
               </tr>
             </thead>
+
             <tbody>
               {books.map((b, i) => (
                 <tr key={b.isbn}>
                   <td>{b.isbn}</td>
                   <td>{b.title}</td>
-                  <td>{b.pubDate}</td>
-                  <td>{b.pubId}</td>
+                  <td>{b.pubdate}</td>
+                  <td>{b.pubid}</td>
+
                   <td>
                     <Input
                       type="number"
@@ -102,6 +110,7 @@ export default function BookList({ onNavigate, notify }) {
                       }
                     />
                   </td>
+
                   <td>
                     <Input
                       type="number"
@@ -112,6 +121,7 @@ export default function BookList({ onNavigate, notify }) {
                       }
                     />
                   </td>
+
                   <td>
                     <Input
                       value={b.category}

@@ -7,7 +7,19 @@ dotenv.config();
 
 const app = express();
 app.use(cors());
-app.use(express.json());
+
+// Safe JSON parser — prevents crash when a request has no body
+app.use((req, res, next) => {
+  // GET requests never need JSON body
+  if (req.method === "GET") return next();
+
+  // Only parse JSON when request actually has JSON content
+  if (req.headers["content-type"] && req.headers["content-type"].includes("application/json")) {
+    return express.json()(req, res, next);
+  }
+
+  next();
+});
 
 // Routes
 app.use("/api/books", booksRoutes);

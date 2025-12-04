@@ -1,5 +1,5 @@
 import React from "react";
-import { ArrowLeft, PlusCircle, List } from "lucide-react";
+import { PlusCircle, List } from "lucide-react";
 import { Card } from "../../ui/card";
 
 export default function BookInventoryMenu({ onNavigate }) {

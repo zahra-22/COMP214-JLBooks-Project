@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ArrowLeft } from "lucide-react";
+import axios from "axios";
 import { Card } from "../../ui/card";
 import { Button } from "../../ui/button";
 import { Label } from "../../ui/label";
@@ -26,21 +26,37 @@ export default function BookRegistration({ onNavigate, notify }) {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Book registered:", formData);
-    notify("Book registered successfully!", "success");
 
-    setFormData({
-      isbn: "",
-      title: "",
-      pubDate: "",
-      pubId: "",
-      cost: "",
-      retail: "",
-      category: "",
-      notes: "",
-    });
+    try {
+      await axios.post("http://localhost:5000/api/books/register", {
+        isbn: formData.isbn,
+        title: formData.title,
+        pubDate: formData.pubDate,
+        pubId: formData.pubId,
+        cost: formData.cost,
+        retail: formData.retail,
+        discount: 0,
+        category: formData.category,
+      });
+
+      notify("Book registered successfully!", "success");
+
+      setFormData({
+        isbn: "",
+        title: "",
+        pubDate: "",
+        pubId: "",
+        cost: "",
+        retail: "",
+        category: "",
+        notes: "",
+      });
+    } catch (error) {
+      console.error("Error registering book:", error);
+      notify("Failed to register book", "error");
+    }
   };
 
   return (
@@ -74,6 +90,7 @@ export default function BookRegistration({ onNavigate, notify }) {
                 required
               />
             </div>
+
             <div style={{ flex: 1 }}>
               <Label htmlFor="pubId">Publisher ID</Label>
               <Input
@@ -108,6 +125,7 @@ export default function BookRegistration({ onNavigate, notify }) {
                 onChange={handleChange}
               />
             </div>
+
             <div style={{ flex: 1 }}>
               <Label htmlFor="cost">Cost</Label>
               <Input
@@ -119,6 +137,7 @@ export default function BookRegistration({ onNavigate, notify }) {
                 onChange={handleChange}
               />
             </div>
+
             <div style={{ flex: 1 }}>
               <Label htmlFor="retail">Retail Price</Label>
               <Input
